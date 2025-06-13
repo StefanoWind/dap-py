@@ -1,14 +1,14 @@
 # doe-dap-dl
 
-This repository contains useful packages for Jupyter Notebook users to interact with data from A2e, Livewire, and the SPP data platform. Users will be able to import these packages and call high-level functions that handle all of the api calls, graphing, and interpolations to stream-line the end user's ability to analyze data.
+This repository contains useful packages for Jupyter Notebook users to interact with data from WDH, Livewire, and the SPP data platform. Users will be able to import these packages and call high-level functions that handle all of the api calls, graphing, and interpolations to stream-line the end user's ability to analyze data.
 
 ## Example
 
 ```python
 from doe_dap_dl import DAP
-a2e = DAP('a2e.energy.gov')
+wdh = DAP('wdh.energy.gov')
 
-a2e.setup_basic_auth(username='username', password='password')
+wdh.setup_basic_auth(username='username', password='password')
 
 # Search for files
 filter = {
@@ -19,10 +19,10 @@ filter = {
     'file_type': 'nc'
 }
 
-file_names = a2e.search(filter)
+file_names = wdh.search(filter)
 
 # download files
-files = a2e.download_files(file_names)
+files = wdh.download_files(file_names)
 ```
 
 [Main docs](https://github.com/DAP-platform/dap-py/blob/master/docs/doe_dap_dl.md)
