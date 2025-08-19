@@ -398,7 +398,6 @@ class DAP:
 
     def __get_download_urls(self, ID, page_size=500):
         """Given order ID, return the download urls"""
-
         urls = []
         cursor = None
 
@@ -410,6 +409,12 @@ class DAP:
             except BadStatusCodeError as e:
                 self.__print("Error getting page of download urls!")
                 self.__print(e)
+                # skip this page and stop trying
+                break
+            except Exception as e:
+                self.__print("Unexpected error while fetching download urls")
+                self.__print(e)
+                break
 
             urls.extend(new_urls)
             self.__print(f"Added {len(new_urls)} urls.")
@@ -422,6 +427,7 @@ class DAP:
 
             self.__print("Another page detected, continuing...\n")
 
+        return urls
     def __get_page_of_download_urls(self, ID, page_size, cursor=None):
         """Return one page of download urls given the order id, cursor and page size"""
         cursor_param = "" if cursor is None else f"&cursor={cursor}"
