@@ -162,7 +162,7 @@ class DAP:
             return False
         return True
 
-    def setup_basic_auth(self, username=None, password=None):
+    def setup_basic_auth(self):
         """Create an auth token without a certificate
 
         Args:
@@ -170,8 +170,8 @@ class DAP:
             password (str, optional): Password, if None it will prompt. Defaults to None.
         """
 
-        username = username or input("username: ")
-        password = password or getpass("password: ")
+        username = input("username: ")
+        password = getpass("password: ")
 
         self.__print(f"Setting up authentication for user {username}...")
 
@@ -185,7 +185,7 @@ class DAP:
         # without a certificate
         # should we try a query? low priority
 
-    def setup_cert_auth(self, username=None, password=None):
+    def setup_cert_auth(self):
         """Given username and password request a cert token and generate a
            certificate
 
@@ -202,8 +202,8 @@ class DAP:
             return True
 
         params = {
-            "username": username or input("username: "),
-            "password": password or getpass("password: "),
+            "username": input("username: "),
+            "password": getpass("password: "),
         }
 
         self.__print(
@@ -225,7 +225,7 @@ class DAP:
             )
         return valid
 
-    def setup_two_factor_auth(self, username=None, password=None, authcode=None):
+    def setup_two_factor_auth(self):
         """Given a username, password, and 2 factor authentication code,
            generate a certificate with two factor auth permissions
 
@@ -242,9 +242,9 @@ class DAP:
             return True
 
         params = {
-            "username": username or input("username: "),
-            "password": password or getpass("password: "),
-            "authcode": authcode or getpass("authcode: "),
+            "username": input("username: "),
+            "password": getpass("password: "),
+            "authcode": getpass("authcode: "),
         }
 
         self.__print(
@@ -388,6 +388,7 @@ class DAP:
             return
 
         ID = json.loads(response.text)["id"]
+
         return ID
 
     # --------------------------------------------------------------
@@ -396,7 +397,6 @@ class DAP:
 
     def __get_download_urls(self, ID, page_size=500):
         """Given order ID, return the download urls"""
-
         urls = []
         cursor = None
 
@@ -408,6 +408,12 @@ class DAP:
             except BadStatusCodeError as e:
                 self.__print("Error getting page of download urls!")
                 self.__print(e)
+                # skip this page and stop trying
+                break
+            except Exception as e:
+                self.__print("Unexpected error while fetching download urls")
+                self.__print(e)
+                break
 
             urls.extend(new_urls)
             self.__print(f"Added {len(new_urls)} urls.")
@@ -420,6 +426,7 @@ class DAP:
 
             self.__print("Another page detected, continuing...\n")
 
+        return urls
     def __get_page_of_download_urls(self, ID, page_size, cursor=None):
         """Return one page of download urls given the order id, cursor and page size"""
         cursor_param = "" if cursor is None else f"&cursor={cursor}"
@@ -715,6 +722,57 @@ class DAP:
             return
 
         return downloaded_files
+    
+    def download_orders(self, order_ids, path="/var/tmp", replace=False):
+        """
+        Download files using existing order IDs.
+
+        Args:
+            order_ids (list): List of order IDs to fetch download URLs from.
+            path (str, optional): The download path. Defaults to '/var/tmp'.
+            replace (bool, optional): Whether to redownload and replace existing files. Defaults to False.
+
+        Returns:
+            list: List of paths to the downloaded files.
+        """
+
+        if not self.__check_for_auth("download from existing orders"):
+            return
+
+        if not order_ids:
+            raise ValueError("No order IDs provided!")
+
+        all_downloaded_files = []
+
+        for ID in order_ids:
+            self.__print(f"Processing order ID: {ID}")
+            self.__print("Fetching download URLs...")
+
+            try:
+                urls = self.__get_download_urls(ID)
+            except BadStatusCodeError as e:
+                self.__print(f"Could not get download URLs for order ID {ID}")
+                self.__print(e)
+                continue
+
+            self.__print(f"Found {len(urls)} URLs for order ID {ID}")
+
+            download = True
+            if self.confirm_downloads:
+                download = self.__proceed_prompt(f"Download {len(urls)} files from order {ID} (y/n)? ")
+
+            if download:
+                try:
+                    downloaded_files = self.__download_from_urls(
+                        urls, path=path, replace=replace
+                    )
+                    all_downloaded_files.extend(downloaded_files)
+                except Exception as e:
+                    self.__print(f"Error downloading files from order ID {ID}")
+                    self.__print(e)
+                    continue
+
+        return all_downloaded_files
 
     def __proceed_prompt(self, prompt):
         while True:

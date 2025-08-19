@@ -50,15 +50,15 @@ The default name for an authetication certificate is `.<host name>.cert`, for ex
 
 If the certificate is valid, the module will renew it. If you don't have a valid certificate, you will have to authenticate via one of the following methods:
 
-#### `wdh.setup_basic_auth(username=None, password=None)`
+#### `wdh.setup_basic_auth()`
 
 Creates authentication with a username and password. The arguments are optional, but the module will prompt for them if omitted.
 
-#### `wdh.setup_cert_auth(username=None, password=None)`
+#### `wdh.setup_cert_auth()`
 
 Creates authentication with a certificate that can be used for future authentication. The certificate is stored in a file named `.<host name>.cert` (e.g. `.wdh.energy.gov.cert`). Returns whether or not a valid certificate was created.
 
-#### `wdh.setup_two_factor_auth(username=None, password=None, authcode=None)`
+#### `wdh.setup_two_factor_auth()`
 
 Creates a certificate, but with two-factor authentication. The authcode is the 6-digit password code from Google Authenticator. This is the highest authentication level available, and is necessary to search for and download certain datasets. The certificate is stored in a file named `.<host name>.cert`. Returns whether or not a valid certificate was created.
 
@@ -159,6 +159,25 @@ filter = {
 }
 
 wdh.download_with_order(filter)
+```
+---
+
+### Download Using an Existing Order(s)
+If you already have an order ID, you can use the following method:
+#### `wdh.download_orders(order_ids, path='/var/tmp/', replace=False)`
+- `order_ids`: A list of order IDs to retrieve download URLs.
+- `path`: Specifies where files will be downloaded. Defaults to `/var/tmp/`.
+- `replace`: Determines whether existing files should be replaced. Defaults to `False`.
+
+This method automatically fetches download URLs from the provided order IDs, confirms the user wants to proceed, and downloads files.
+
+##### Example:
+```python
+wdh.download_orders(
+    order_ids=["order_id"], 
+    path="/var/tmp/",
+    replace=False
+)
 ```
 
 # Filtering
