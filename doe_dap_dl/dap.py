@@ -389,7 +389,6 @@ class DAP:
 
         ID = json.loads(response.text)["id"]
 
-        print("id:", ID)
         return ID
 
     # --------------------------------------------------------------
