@@ -9,8 +9,6 @@ from getpass import getpass
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
-from .utils.scraper import get_api_url
-
 
 class BadStatusCodeError(RuntimeError):
     def __init__(self, req):
@@ -55,8 +53,10 @@ class DAP:
             self._api_url = (
                 "https://13tl7mor8f.execute-api.us-west-2.amazonaws.com/prod"
             )
-        else:
-            self._api_url = get_api_url(self.host_URL)
+        elif "wdh" in self.host_URL or "a2e" in self.host_URL:
+            self._api_url = "https://70d76sxu18.execute-api.us-west-2.amazonaws.com/prod"
+        elif "livewire" in self.host_URL:
+            self._api_url = "https://xkkcnw0931.execute-api.us-west-2.amazonaws.com/prod"
 
         self._quiet = quiet
         self.confirm_downloads = confirm_downloads
