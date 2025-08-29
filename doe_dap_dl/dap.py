@@ -97,7 +97,7 @@ class DAP:
             if self.renew_cert(quiet=True):
                 self.__create_cert_auth_token()
                 self.__print(
-                    "Authenticaion successfully created using valid certificate."
+                    "Authentication successfully created using valid certificate."
                 )
             else:
                 self.__print("Certificate was invalid.")
@@ -162,7 +162,7 @@ class DAP:
             return False
         return True
 
-    def setup_basic_auth(self):
+    def setup_basic_auth(self,username=None,password=None):
         """Create an auth token without a certificate
 
         Args:
@@ -170,8 +170,8 @@ class DAP:
             password (str, optional): Password, if None it will prompt. Defaults to None.
         """
 
-        username = input("username: ")
-        password = getpass("password: ")
+        username = username
+        password = password
 
         self.__print(f"Setting up authentication for user {username}...")
 
@@ -185,7 +185,7 @@ class DAP:
         # without a certificate
         # should we try a query? low priority
 
-    def setup_cert_auth(self):
+    def setup_cert_auth(self,username=None,password=None):
         """Given username and password request a cert token and generate a
            certificate
 
@@ -200,10 +200,10 @@ class DAP:
         if self.renew_cert(quiet=True):
             self.__print("Valid certificate already created, it has been renewed.")
             return True
-
+        
         params = {
-            "username": input("username: "),
-            "password": getpass("password: "),
+            "username": username,
+            "password": password,
         }
 
         self.__print(
@@ -225,7 +225,7 @@ class DAP:
             )
         return valid
 
-    def setup_two_factor_auth(self):
+    def setup_two_factor_auth(self,username=None,password=None):
         """Given a username, password, and 2 factor authentication code,
            generate a certificate with two factor auth permissions
 
@@ -240,10 +240,10 @@ class DAP:
         if self.renew_cert(quiet=True):
             self.__print("Valid certificate already created, it has been renewed.")
             return True
-
+        
         params = {
-            "username": input("username: "),
-            "password": getpass("password: "),
+            "username": username,
+            "password": password,
             "authcode": getpass("authcode: "),
         }
 
